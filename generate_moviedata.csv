@@ -1,0 +1,236 @@
+import pandas as pd
+
+# ==========================================
+#  MASTER DATA ENTRY
+# ==========================================
+
+# --- 1. MOVIES (Categorized by Genre/Vibe) ---
+# We will map these genres to specific Moods in the processing step later.
+
+action_titles = [
+    "The Bourne Identity", "The Bourne Supremacy", "The Bourne Ultimatum", "Skyfall", "Casino Royale",
+    "Quantum of Solace", "GoldenEye", "Tinker Tailor Soldier Spy", "Argo", "Jack Reacher",
+    "Jack Ryan (Series)", "24 (Series)", "Body of Lies", "Sicario", "Sicario: Day of the Soldado",
+    "Ronin", "Heat", "Extraction", "Extraction 2", "Atomic Blonde", "Kingsman: The Secret Service",
+    "Kingsman: The Golden Circle", "Tenet", "Inception", "The Dark Knight", "The Man from U.N.C.L.E",
+    "The Night Manager (Series)", "Zero Dark Thirty", "The Equalizer", "The Equalizer 2", "Collateral",
+    "Enemy of the State", "Mission: Impossible", "The Gray Man", "Munich", "The Recruit", "Safe House",
+    "Wanted", "Red Sparrow", "Bridge of Spies", "Patriot Games", "Clear and Present Danger",
+    "Alex Rider (Series)", "Shooter (Series)", "Reacher (Series)", "Bodyguard (Series)",
+    "The Americans (Series)", "Homeland (Series)", "The Spy (Series)", "La Femme Nikita"
+]
+
+comedy_titles = [
+    "Phir Hera Pheri", "Welcome", "Hungama", "Andaz Apna Apna", "Chupke Chupke", "Golmaal (2006)",
+    "Golmaal Returns", "Golmaal 3", "Bhool Bhulaiyaa", "Malamaal Weekly", "Dhamaal", "Double Dhamaal",
+    "Total Dhamaal", "De Dana Dan", "Awara Pagal Deewana", "Mujhse Shaadi Karogi", "No Entry", "Partner",
+    "Housefull", "Housefull 2", "Housefull 3", "Tere Bin Laden", "Fukrey", "Fukrey Returns",
+    "Delhi Belly", "Khosla Ka Ghosla", "Bheja Fry", "Jaane Bhi Do Yaaro", "PK", "3 Idiots",
+    "Jolly LLB", "Jolly LLB 2", "Vicky Donor", "Badhaai Ho", "Stree", "Luka Chuppi",
+    "Sonu Ke Titu Ki Sweety", "Pati Patni Aur Woh", "Munnabhai MBBS", "Lage Raho Munnabhai",
+    "OMG: Oh My God", "The Office (US)", "Brooklyn Nine-Nine", "Community", "The Good Place",
+    "IT Crowd", "Modern Family", "Peep Show", "Superbad", "The Hangover"
+]
+
+animation_titles = [
+    "Cars 2", "Cars 3", "Planes", "Planes: Fire & Rescue", "Toy Story", "Ratatouille",
+    "The Incredibles", "The Incredibles 2", "Finding Nemo", "Finding Dory", "Wreck-It Ralph",
+    "Ralph Breaks the Internet", "Big Hero 6", "Monsters Inc", "Monsters University", "Wall-E",
+    "Bolt", "Zootopia", "Onward", "Inside Out", "Inside Out 2", "Soul", "Turning Red", "Luca",
+    "Moana", "The Iron Giant", "How to Train Your Dragon", "HTTYD 2", "HTTYD 3", "Kung Fu Panda",
+    "KFP 2", "KFP 3", "Megamind", "Shrek", "Shrek 2", "Shrek 3", "Shrek 4", "Bee Movie", "Turbo",
+    "Speed Racer", "The Adventures of Tintin", "Despicable Me", "DM 2", "DM 3", "Minions",
+    "Minions: Rise of Gru", "Cloudy with a Chance of Meatballs", "Madagascar", "Cars on the Road (Series)", "Lightyear"
+]
+
+horror_titles = [
+    "The Conjuring", "The Conjuring 2", "Conjuring 3", "Insidious", "Insidious 2", "Insidious 3",
+    "Insidious 4", "Insidious 5", "The Nun", "The Nun 2", "Annabelle", "Annabelle: Creation",
+    "Annabelle Comes Home", "Hereditary", "The Witch", "Midsommar", "Get Out", "Us", "Nope",
+    "Sinister", "Sinister 2", "The Babadook", "The Ring", "Rings", "Ju-On The Grudge", "It (2017)",
+    "It Chapter Two", "A Quiet Place", "A Quiet Place II", "Smile", "Talk to Me", "Don’t Breathe",
+    "Don’t Breathe 2", "Train to Busan", "The Wailing", "Gonjiam: Haunted Asylum", "REC", "REC 2",
+    "Veronica", "Oculus", "Gerald’s Game", "Doctor Sleep", "1922", "Bird Box",
+    "The Haunting of Hill House (Series)", "The Haunting of Bly Manor", "Midnight Mass", "Marianne (Series)",
+    "The Medium", "Tumbbad"
+]
+
+romance_titles = [
+    "Tholi Prema (1998)", "Tholi Prema (2018)", "Ninnu Kori", "Majili", "Yem Maya Chesave", "96",
+    "Ok Kanmani", "OK Jaanu", "Alaipayuthey", "Roja", "Sita Ramam", "Aakasam Nee Haddhu Ra",
+    "Hridayam", "Premam", "Bangalore Days", "Charlie", "Dia", "Katheyondu Shuruvagide", "Qala",
+    "Darlings", "Lootera", "Tamasha", "Jab Tak Hai Jaan", "Ae Dil Hai Mushkil", "Barfi", "Wake Up Sid",
+    "Jaane Tu Ya Jaane Na", "Kabir Singh", "Rockstar", "Chhichhore", "The Notebook", "La La Land",
+    "Eternal Sunshine of the Spotless Mind", "Begin Again", "Carol", "Before Sunrise", "Before Sunset",
+    "Before Midnight", "Blue Valentine", "Call Me By Your Name", "Her", "Brooklyn", "About Time",
+    "The Fault in Our Stars", "The Spectacular Now", "Notting Hill", "Pride & Prejudice",
+    "In the Mood for Love", "Your Name", "Weathering With You"
+]
+
+romcom_titles = [
+    "Hum Tum", "Salaam Namaste", "Love Aaj Kal (2009)", "Yeh Jawaani Hai Deewani", "Tamasha",
+    "Barfi", "Wake Up Sid", "Band Baaja Baaraat", "Hasee Toh Phasee", "Shuddh Desi Romance",
+    "Bareilly Ki Barfi", "Luka Chuppi", "Piku", "Rab Ne Bana Di Jodi", "Kal Ho Na Ho",
+    "Jaane Tu Ya Jaane Na", "Dil Chahta Hai", "2 States", "Jab Harry Met Sejal", "Kuch Kuch Hota Hai",
+    "Dilwale Dulhania Le Jayenge", "Notting Hill", "Crazy Rich Asians", "500 Days of Summer",
+    "The Proposal", "Friends with Benefits", "The Holiday", "Serendipity", "Silver Linings Playbook",
+    "When Harry Met Sally", "10 Things I Hate About You", "The Notebook", "Hitch",
+    "To All the Boys I’ve Loved Before", "Crazy, Stupid, Love", "Love, Rosie", "The Hating Game",
+    "Easy A", "How to Lose a Guy in 10 Days", "Something Borrowed", "PS I Love You", "Set It Up",
+    "Always Be My Maybe", "The Lunchbox", "Sairat", "Atrangi Re", "English Vinglish",
+    "Before We Go", "La La Land", "Midnight in Paris"
+]
+
+favs_titles = [
+    "Chak De India", "Lagaan", "Taare Zameen Par", "Rang Rasiya", "Sarfarosh", "Lakshya",
+    "Bhaag Milkha Bhaag", "3 Idiots", "PK", "Mulk", "Airlift", "Neerja", "Raazi", "Dangal",
+    "Super 30", "Chakravyuh", "Article 15", "Pink", "M.S. Dhoni", "Mandela (Tamil)", "Court",
+    "The White Tiger", "The Great Indian Kitchen", "Newton", "Masaan", "Gully Boy", "October",
+    "Udaan", "The Lunchbox", "Haider", "Madras Cafe", "Kaala", "A Wednesday", "Peepli Live",
+    "Ship of Theseus", "Barfi", "Dear Zindagi", "Sardar Udham", "Mandela: Long Walk to Freedom",
+    "Hotel Rwanda", "Spotlight", "The Social Network", "The Pursuit of Happyness",
+    "Eternal Sunshine of the Spotless Mind", "Good Will Hunting", "Life is Beautiful",
+    "Schindler’s List", "Dead Poets Society", "Forrest Gump"
+]
+
+life_changing_titles = [
+    "The Shawshank Redemption", "Forrest Gump", "Fight Club", "The Pursuit of Happyness",
+    "Dead Poets Society", "A Beautiful Mind", "The Green Mile", "Into the Wild",
+    "The Secret Life of Walter Mitty", "Life of Pi", "Good Will Hunting", "Whiplash",
+    "Schindler’s List", "Cast Away", "Her", "Soul", "Arrival", "The Tree of Life", "Interstellar",
+    "Inception", "The Truman Show", "The Curious Case of Benjamin Button", "Manchester by the Sea",
+    "The Perks of Being a Wallflower", "Room", "Eternal Sunshine of the Spotless Mind", "Before Trilogy",
+    "Collateral Beauty", "The Father", "Silence", "The Kite Runner", "Lion", "The Pianist",
+    "Hacksaw Ridge", "Requiem for a Dream", "Gandhi", "The Boy Who Harnessed the Wind",
+    "The Florida Project", "Bo Burnham’s Inside", "Wild", "Nomadland", "The Last Samurai",
+    "Ikiru", "Rashomon", "Seven Pounds", "The Intouchables", "The Diving Bell and the Butterfly",
+    "Amelie", "A Separation", "Tokyo Story"
+]
+
+comfort_titles = [
+    "English Vinglish", "Barfi", "The Lunchbox", "Wake Up Sid", "Dear Zindagi", "October",
+    "Kapoor & Sons", "Taare Zameen Par", "Stanley ka Dabba", "Udaan", "Qarib Qarib Singlle",
+    "Karwaan", "Piku", "Nil Battey Sannata", "Secret Superstar", "Chhichhore", "Dil Chahta Hai",
+    "Zindagi Na Milegi Dobara", "Highway", "Chak De India", "Lakshya", "Little Women",
+    "The Secret Life of Walter Mitty", "The Intern", "Chef", "Julie & Julia", "About Time",
+    "Paddington", "Paddington 2", "The Hundred-Foot Journey", "The Holiday", "The Pursuit of Happyness",
+    "Good Will Hunting", "The Terminal", "Amelie", "The Intouchables", "Finding Nemo", "Up",
+    "Soul", "Inside Out", "Moana", "Spirited Away", "My Neighbor Totoro", "Whisper of the Heart",
+    "Kiki’s Delivery Service", "Our Little Sister", "Shoplifters", "The Farewell", "Roma", "CODA"
+]
+
+suspense_titles = [
+    "Primer", "Coherence", "Triangle", "Inception", "Tenet", "Interstellar", "Arrival", "Source Code",
+    "Edge of Tomorrow", "The Butterfly Effect", "Looper", "Timecrimes", "Dark (Series)", "12 Monkeys",
+    "Shutter Island", "The Prestige", "Memento", "Fight Club", "Donnie Darko", "The Machinist",
+    "Mr. Nobody", "Identity", "Mulholland Drive", "Enemy", "The Game", "Oldboy", "The Invisible Guest",
+    "The Others", "Gone Girl", "Zodiac", "Se7en", "Prisoners", "Sicario", "Mystic River", "The Gift",
+    "Split", "Glass", "The Sixth Sense", "Unbreakable", "Annihilation", "The OA (Series)",
+    "Maniac (Series)", "Devs (Series)", "Westworld", "Black Mirror", "Paprika", "Perfect Blue", "Solaris"
+]
+
+# --- 2. DOCUMENTARIES (Mood Based) ---
+doc_very_happy = ["Jiro Dreams of Sushi", "The Salt of the Earth", "Free Solo", "The Dawn Wall", "Won’t You Be My Neighbor?", "March of the Penguins", "Fantastic Fungi", "The Biggest Little Farm", "My Octopus Teacher", "Life in a Day", "Fire of Love", "Jane", "He Named Me Malala", "I Am Greta", "14 Peaks", "Meru", "Man on Wire", "Searching for Sugar Man", "Buena Vista Social Club", "The Alpinist", "Born to Be Wild", "The Elephant Queen", "Becoming", "Inside Bill’s Brain", "Happy (2011)", "Chef's Table", "Street Food", "Abstract", "Our Planet", "Planet Earth", "Blue Planet", "Apollo 11", "The Last Dance", "Pelé", "Senna", "Undefeated", "Hoop Dreams", "Maiden", "The Speed Cubers", "Science Fair", "The Boy Who Harnessed the Wind", "Gunda", "Mission Blue", "Kiss the Ground", "Honeyland", "Every Little Step", "Waiting for Superman", "IMAX: Hubble", "The Barkley Marathons", "Becoming Warren Buffett", "Notes on Blindness", "Faces Places", "Landfill Harmonic", "Batkid Begins", "The Short Game", "The Rescue", "The Kindness Diaries", "The Elephant Whisperers", "Puff: Wonders of the Reef", "Chasing Coral", "A Life on Our Planet", "RBG", "The Year Earth Changed", "The Redeem Team", "Fantastic Mr. Feynman"]
+doc_happy = ["Make Hummus Not War", "Super Size Me", "Somm", "The Pixar Story", "The Toys That Made Us", "McQueen", "Minimalism", "The True Cost", "AlphaGo", "Free to Play", "Lo and Behold", "Indie Game: The Movie", "Exit Through the Gift Shop", "20 Feet From Stardom", "The Defiant Ones", "Quincy", "Beatles Anthology", "Supersonic", "Amy", "What Happened, Miss Simone?", "The Yes Men Fix the World", "Fyre", "Sour Grapes", "The China Hustle", "The Great Hack", "Cosmos", "The Mind Explained", "Life on Earth", "Wonders of the Solar System", "India’s Daughter", "Supermen of Malegaon", "Children of Heaven", "The Act of Killing", "Nostalgia for the Light", "HyperNormalisation", "Bowling for Columbine", "Sicko", "Citizenfour", "Inside North Korea’s Dynasty", "O.J.: Made in America", "American Factory", "Icarus", "Three Identical Strangers", "Amanda Knox", "The Staircase", "Making a Murderer", "Wild Wild Country", "The Vow", "Tiger King", "Val", "Jim & Andy", "Shirkers", "Stray", "Strong Island", "Becoming Cousteau", "The Truffle Hunters", "WeWork", "White Helmets", "Jumpman"]
+doc_neutral = ["Baraka", "Samsara", "Koyaanisqatsi", "Human", "Life in a Day", "Night on Earth", "Nanook of the North", "Man with a Movie Camera", "Leviathan", "Cameraperson", "Minding the Gap", "The Gleaners & I", "Grizzly Man", "Touching the Void", "Rivers and Tides", "Encounters at the End of the World", "Cave of Forgotten Dreams", "Into the Inferno", "Lessons of Darkness", "Manufactured Landscapes", "The Social Dilemma", "Helvetica", "Objectified", "Urbanized", "The 4th Revolution", "Collapse", "Food, Inc.", "The Fog of War", "HyperNormalisation", "Dirty Money", "The Century of the Self", "The Power of Nightmares", "The Trap", "Tyke Elephant Outlaw", "Earthlings", "Blackfish", "Seaspiracy", "Cowspiracy", "The Cove", "The Family", "Wormwood", "The Jinx", "The Keepers", "Dirty Wars", "Enron", "Going Clear", "The Armstrong Lie", "The King of Kong", "Tyson", "Manhunt: Unabomber", "The Thin Blue Line", "Harlan County, USA", "Paris is Burning", "American Movie", "Crumb", "Gimme Shelter", "Stop Making Sense", "Shine a Light", "Leonard Cohen: I’m Your Man", "Sound City", "Cartel Land", "City of Ghosts", "Restrepo", "The Square", "Winter on Fire", "Welcome to Chechnya", "Athlete A", "The Propaganda Game"]
+doc_sad = ["Dear Zachary", "The Cove", "Blackfish", "Earthlings", "Amy", "13th", "Time (2020)", "Strong Island", "The Act of Killing", "The Look of Silence", "Shoah", "S-21", "Auschwitz", "Night and Fog", "The Missing Picture", "Restrepo", "City of Ghosts", "Cartel Land", "Winter on Fire", "The Square", "Virunga", "Born into Brothels", "Children Underground", "Invisible Children", "Life and Debt", "How to Survive a Plague", "We Were Here", "5 Broken Cameras", "The Gatekeepers", "The Trials of Henry Kissinger", "Bowling for Columbine", "Fahrenheit 9/11", "Going Clear", "Dear America", "The Vietnam War", "The Thin Blue Line", "The Farm", "The Central Park Five", "The Staircase", "Making a Murderer", "Three Identical Strangers", "Amanda Knox", "Who Killed Garrett Phillips", "The Keepers", "Tell Me Who I Am", "For Sama", "The White Helmets", "The Bleeding Edge", "The Hunting Ground", "The Invisible War", "India’s Daughter", "Leaving Neverland", "Surviving R. Kelly", "The Disappearance of Madeleine McCann", "Hostages", "Tickling Giants", "The Last Man on the Moon", "Hunger Ward", "Collective", "Hell and Back Again", "The Bridge", "The Suicide Tourist", "Grizzly Man", "Touching the Void", "The Summit", "Into the Abyss", "Cries from Syria", "Last Men in Aleppo", "The Work", "A Lion in the House", "The Road to Guantanamo", "The Waiting Room", "Evelyn", "Mommy Dead and Dearest", "Beware the Slenderman", "Jim: The James Foley Story", "112 Weddings", "I Am Another You", "The Dying Rooms", "The Wolfpack", "Far from the Tree", "Tarnation", "Stories We Tell", "Unrest", "Gleason"]
+doc_very_sad = ["Dear Zachary", "Shoah", "Night and Fog", "S-21", "The Missing Picture", "The Look of Silence", "The Act of Killing", "For Sama", "Hunger Ward", "Last Men in Aleppo", "Cries from Syria", "The Bridge", "The Suicide Tourist", "Leaving Neverland", "Surviving R. Kelly", "The Trials of Henry Kissinger", "The Fog of War", "The Farm", "Dear America", "Long Night’s Journey Into Day", "The Dying Rooms", "The Killing Fields", "Invisible War", "The Hunting Ground", "India’s Daughter", "One Child Nation", "5 Broken Cameras", "The White Helmets", "Born into Brothels", "Children Underground", "Who Killed Garrett Phillips", "Tell Me Who I Am", "The Keepers", "Three Identical Strangers", "Casting JonBenet", "Amanda Knox", "The Central Park Five", "Paradise Lost Trilogy", "Deliver Us From Evil", "The Disappearance of Madeleine McCann", "The Family I Had", "Mommy Dead and Dearest", "The Work", "A Lion in the House", "Tarnation", "Boy Interrupted", "Minding the Gap", "Strong Island", "Stories We Tell", "The Wolfpack", "City of Ghosts", "Restrepo", "Hell and Back Again", "The Square", "Winter on Fire", "Cartel Land", "Virunga", "Gaza Fights for Freedom", "The Silent War", "Unrest", "The Last Days", "Auschwitz", "The Holocaust", "Hearts and Minds", "Srebrenica", "The Anatomy of Hate", "A Cry for Help", "Juvies", "Into the Abyss", "Blackfish", "Earthlings", "Seaspiracy", "Cowspiracy", "The Ivory Game", "The Game Changers", "The Crash Reel", "Gleason", "The Road to Guantanamo", "The Cleaners", "A Cambodian Spring", "Zeitoun", "112 Weddings", "When the Levees Broke", "It Felt Like a Kiss", "16 Shots", "I Am Another You", "The Death and Life of Marsha P. Johnson"]
+
+# --- 3. WEB SERIES (Mood Based) ---
+web_very_happy = ["Ted Lasso", "Parks and Recreation", "The Good Place", "Brooklyn Nine-Nine", "Modern Family", "Schitt’s Creek", "Friends", "How I Met Your Mother", "Kim’s Convenience", "The Marvelous Mrs. Maisel", "Young Sheldon", "Master of None", "Jane the Virgin", "The Great British Bake Off", "Clarkson’s Farm", "Queer Eye", "Atypical", "Heartstopper", "Never Have I Ever", "Dash & Lily", "Emily in Paris", "Grace and Frankie", "The Office (US)", "Arrested Development", "30 Rock", "Mythic Quest", "Unbreakable Kimmy Schmidt", "High School Musical: TM", "Sweet Tooth", "Extraordinary Attorney Woo", "Reply 1988", "Crash Landing on You", "Hometown Cha Cha Cha", "Weightlifting Fairy Kim Bok Joo", "Hospital Playlist", "Kota Factory", "Panchayat", "Gullak", "Little Things", "TVF Pitchers", "The Good Doctor", "Bluey", "Avatar: The Last Airbender", "Anne with an E", "The End of the F***ing World", "Fleabag", "Only Murders in the Building", "Psych", "Monk", "The Muppets"]
+web_happy = ["The Big Bang Theory", "New Girl", "Community", "The IT Crowd", "Marvellous Mrs. Maisel", "The Mindy Project", "Superstore", "The Umbrella Academy", "Gilmore Girls", "Alexa & Katie", "Kim’s Convenience", "Unbreakable Kimmy Schmidt", "Shrinking", "Starstruck", "Man With a Plan", "The Bold Type", "Lovesick", "Atlanta", "Ramy", "Barry", "Peacemaker", "Loki", "Hawkeye", "Ms. Marvel", "Doctor Who", "Good Omens", "Merlin", "Young Royals", "Sex Education", "On My Block", "The Middle", "Malcolm in the Middle", "Ugly Betty", "The Fresh Prince of Bel-Air", "Fawlty Towers", "Seinfeld", "Everybody Loves Raymond", "Two and a Half Men", "Happy Endings", "Episodes", "Man vs Bee", "Chuck", "Scrubs", "Psych", "Monk", "Zoey’s Extraordinary Playlist", "Jury Duty", "The Afterparty", "Upload", "Red Oaks"]
+web_neutral = ["Mad Men", "The Crown", "Succession", "House of Cards", "Better Call Saul", "Breaking Bad", "Mindhunter", "True Detective", "Ozark", "Narcos", "The Wire", "Fargo", "Sherlock", "Luther", "Slow Horses", "Mr. Robot", "Dark", "The Americans", "Broadchurch", "The Night Agent", "Bodyguard", "Westworld", "Severance", "Devs", "The OA", "The Haunting of Hill House", "The Night Manager", "Line of Duty", "Fauda", "Jack Ryan", "Delhi Crime", "Paatal Lok", "Asur", "Criminal Justice", "Sacred Games", "Le Bureau", "Borgen", "Money Heist", "Lupin", "Babylon Berlin", "Gomorrah", "Peaky Blinders", "Black Mirror", "Maniac", "The Sinner", "The Outsider", "Giri/Haji", "Happy Valley", "Taboo", "Rectify"]
+web_sad = ["The Leftovers", "BoJack Horseman", "Fleabag (S1)", "Black Mirror", "When They See Us", "Chernobyl", "It’s Okay to Not Be Okay", "This Is Us", "After Life", "Maid", "Euphoria", "Normal People", "A Million Little Things", "13 Reasons Why", "Sharp Objects", "The Handmaid’s Tale", "Unbelievable", "Years and Years", "Patrick Melrose", "Unorthodox", "Unforgotten", "Atypical", "The Family Man S2", "Paatal Lok", "Delhi Crime S2", "The Haunting of Bly Manor", "Midnight Mass", "Dark", "The Pacific", "Band of Brothers", "The Night Of", "Mare of Easttown", "Scenes from a Marriage", "True Detective S3", "Mindhunter", "Ozark", "Breaking Bad", "Better Call Saul", "The Crown", "Peaky Blinders", "The Last of Us", "The English Game", "The End of the F***ing World", "The Rain", "1883", "Station Eleven", "Rectify", "Breathe (India)", "Flowers", "A Girl from Nowhere"]
+web_very_sad = ["The Leftovers", "Atypical", "It’s Okay to Not Be Okay", "My Mister", "Move to Heaven", "Navillera", "An Incurable Case of Love", "Unbelievable", "Breaking Bad", "Better Call Saul", "When They See Us", "13 Reasons Why", "Chernobyl", "The Handmaid’s Tale", "Mare of Easttown", "Sharp Objects", "Unorthodox", "Band of Brothers", "The Pacific", "The Night Of", "Years and Years", "The Act", "True Detective S1", "Rectify", "Six Feet Under", "Euphoria", "A Million Little Things", "After Life", "Scenes from a Marriage", "Normal People", "Station Eleven", "Midnight Mass", "The Haunting of Bly Manor", "Dark", "The OA", "Flowers", "My Brilliant Friend", "The Queen’s Gambit", "Dear Child", "Your Honor", "Black Bird", "Hostages", "Kaafir", "School Tales", "Typewriter", "Delhi Crime S2", "Paatal Lok", "Asur", "Giri/Haji"]
+
+# --- 4. SHORT FILMS (Mood Based) ---
+short_very_happy = ["Piper", "Bao", "La Luna", "Lava", "For the Birds", "Feast", "Blue Umbrella", "Kitbull", "Burrow", "Wind", "Float", "Loop", "Out", "Inner Workings", "Us Again", "Paperman", "Dear Basketball", "Hair Love", "The Present", "Coin Operated", "Snack Attack", "Changing Batteries", "Alike", "The Black Hole", "Oktapodi", "Geri’s Game", "Life is Beautiful", "Catching the Bus", "Tamasha", "Chutney", "Little Pumpkin", "Khujli", "Natkhat", "Jamnapaar", "Juice", "Rammat-Gammat", "Fools Day", "The Answers", "Borrowed Time", "Joy Story", "Sonder", "Happiness", "A Balloon for Ben", "The Silent Child", "The Gunfighter", "In a Heartbeat", "Soar", "Drawn Closer", "Taking Flight", "Henry & Aaron’s Christmas", "The Maker"]
+short_happy = ["Signs", "Table 7", "Stutterer", "The Most Beautiful Thing", "A Social Life", "The Happy To-Do List", "Gubbare", "Gauru", "Chai", "Shehr", "Prakash", "Mango Dreams", "Adman", "Tan Lines", "Happiness", "Joy Story", "Le Gouffre", "Lockdown Love", "Sticks & Stones", "Salvation Army Man", "One Man’s Loss", "97%", "Willie Wagtail", "The English Teacher", "All That We Share", "The Egg", "Coda", "Nescafé Stammerer Ad", "True Love", "A Moment in Love", "A Day in the Life of a Pencil", "Threshold", "Monsoon", "Sindoor", "Syahee", "The Big Snit", "Job Interview", "Ambition", "Two Cars, One Night", "Tallulah", "Sultana’s Dream", "Afterglow", "Gracias", "The Reward", "Sweet Cocoon", "Catch It", "Alike", "Misery Loves Company", "This Is Me", "Curve"]
+short_neutral = ["The Black Hole", "The Big Shave", "World of Tomorrow", "The Drift", "The Neighbors’ Window", "Limbo", "Operator", "Ten Meter Tower", "Thunder Road", "Five Feet Apart", "Curve", "The Ladder", "The Gift", "The Box", "R’ha", "Ruin", "The Answers", "Neighbors", "Night and Fog", "Sandpit", "Grey Umbrella", "Dawn", "Hunger", "Kachra", "Taandav", "Carbon", "Shunya", "The Debut", "Vitha", "Mithya", "Le Grand Jeu", "Bottles", "Alma", "Pale Blue Dot", "The Man Who Planted Trees", "Thunder Road", "Cargo", "House of Small Cubes", "Father and Daughter", "The Sandman", "Mama", "La Maison en Petits Cubes", "Experimental", "Ten Minutes Older", "The Cat Piano", "The Lost Thing", "The Ridge", "Stop", "The Phone Call", "One Minute Time Machine"]
+short_sad = ["The Silent Child", "Skin", "The Lost Valentine", "The Neighbors’ Window", "Borrowed Time", "The Present", "A Reasonable Request", "The Arrival of Wang", "How They Get There", "Five Feet Apart", "Stutterer", "Henry", "The Phone Call", "The Sandman", "Punyakoti", "The Big Snit", "I Miss You", "The Mother", "Exit", "The Gunfighter", "Blinky TM", "Fault", "Jaan", "Juice", "Kanika", "Nitishastra", "Khuli Khidki", "Ahalya", "Chutney", "Unsaid", "Ted", "Umbrella", "Mogra Phulaalaa", "Maya", "Ambition", "My Friend Mavis", "A Crow’s Tale", "Mankind", "Shunyata", "The Red Balloon", "Salt", "The Gift", "The Bear", "Fragile", "Curve", "The Answers", "The Last Day of Darkness", "I Remember", "The Edge", "Feast of the Epiphany"]
+short_very_sad = ["Dear Basketball", "If Anything Happens I Love You", "The Silent Child", "Five Feet Apart", "Borrowed Time", "Father And Daughter", "The Red Turtle", "The Neighbors’ Window", "Henry", "The Phone Call", "Home", "The Piano", "The Present", "Inseparable", "The Arrival", "Brother", "My Friend Rabbit", "Every Child", "Zero", "The Pearce Sisters", "I Miss You", "The Lost Thing", "Shunyata", "Mama", "The Sandman", "Cargo", "Ahalya", "Juice", "Taandav", "Ambition", "Rays", "The Gift", "The Boy, the Mole, the Fox and the Horse", "Silent", "The Black Hole", "Blinky TM", "More", "Hill", "Excision", "Mankind", "A Crow in Hell", "Strangers", "Curve", "The Answers", "The Remaining", "Death of a Shadow", "97%", "Operator", "Refuge", "Mute"]
+
+# ==========================================
+#  PROCESSING LOGIC
+# ==========================================
+data = []
+
+def add_entry(title_list, type_label, mood_list, sub_genre=None):
+    for title in title_list:
+        # Auto-detect if it's a series hidden in the movie lists
+        real_type = type_label
+        clean_title = title
+        if "(Series)" in title:
+            real_type = "Series"
+            clean_title = title.replace("(Series)", "").strip()
+        
+        # Flatten mood list to string for easier checking later
+        # We assign the content to ALL compatible moods
+        for m in mood_list:
+            data.append({
+                "Title": clean_title,
+                "Type": real_type,
+                "Mood": m,
+                "Genre": sub_genre if sub_genre else "General"
+            })
+
+# --- MOVIE MAPPING (Genre -> Compatible Moods) ---
+# Action -> Good for Neutral (Thrill) and Happy (Excitement)
+add_entry(action_titles, "Movie", ["Neutral", "Happy"], "Action")
+
+# Comedy -> Good for Happy, Very Happy, and Sad/Very Sad (to Cheer up)
+add_entry(comedy_titles, "Movie", ["Happy", "Very happy", "Sad", "Very sad"], "Comedy")
+
+# Animation -> Good for Happy, Neutral, Very Happy
+add_entry(animation_titles, "Movie", ["Happy", "Neutral", "Very happy"], "Animation")
+
+# Horror -> Good for Neutral (Thrill seekers usually aren't 'Sad' looking for horror, but Neutral looking for stimulation)
+add_entry(horror_titles, "Movie", ["Neutral"], "Horror")
+
+# Romance -> Good for Neutral, Happy, Sad (Romance fits many vibes)
+add_entry(romance_titles, "Movie", ["Neutral", "Happy", "Sad"], "Romance")
+
+# Rom-Com -> Happy, Very Happy, Sad (Comfort)
+add_entry(romcom_titles, "Movie", ["Happy", "Very happy", "Sad"], "Rom-Com")
+
+# All Time Favs -> Neutral, Happy
+add_entry(favs_titles, "Movie", ["Neutral", "Happy"], "Classic")
+
+# Life Changing -> Sad (Introspective), Neutral, Very Sad (Deep)
+add_entry(life_changing_titles, "Movie", ["Sad", "Neutral", "Very sad"], "Life-Changing")
+
+# Comfort -> Very Sad, Sad (Comfort needed), Neutral
+add_entry(comfort_titles, "Movie", ["Very sad", "Sad", "Neutral"], "Comfort")
+
+# Suspense -> Neutral
+add_entry(suspense_titles, "Movie", ["Neutral"], "Suspense/Mystery")
+
+
+# --- EXPLICIT MOOD MAPPING (Docs, Web Series, Shorts) ---
+# Documentaries
+add_entry(doc_very_happy, "Documentary", ["Very happy", "Happy"], "Uplifting")
+add_entry(doc_happy, "Documentary", ["Happy", "Neutral"], "Feel-good")
+add_entry(doc_neutral, "Documentary", ["Neutral"], "Informative")
+add_entry(doc_sad, "Documentary", ["Sad", "Neutral"], "Emotional")
+add_entry(doc_very_sad, "Documentary", ["Very sad", "Sad"], "Heavy")
+
+# Web Series
+add_entry(web_very_happy, "Series", ["Very happy", "Happy"], "Wholesome")
+add_entry(web_happy, "Series", ["Happy", "Neutral"], "Light")
+add_entry(web_neutral, "Series", ["Neutral"], "Gripping")
+add_entry(web_sad, "Series", ["Sad", "Neutral"], "Drama")
+add_entry(web_very_sad, "Series", ["Very sad", "Sad"], "Tragedy")
+
+# Short Films
+add_entry(short_very_happy, "Short Film", ["Very happy", "Happy"], "Inspiring")
+add_entry(short_happy, "Short Film", ["Happy", "Neutral"], "Pleasant")
+add_entry(short_neutral, "Short Film", ["Neutral"], "Artistic")
+add_entry(short_sad, "Short Film", ["Sad", "Neutral"], "Moving")
+add_entry(short_very_sad, "Short Film", ["Very sad", "Sad"], "Devastating")
+
+# Export
+df = pd.DataFrame(data)
+# Remove duplicates (some titles might appear in multiple lists)
+df = df.drop_duplicates(subset=['Title', 'Type', 'Mood'])
+df.to_csv("movies_data.csv", index=False)
+print(f"Successfully created movies_data.csv with {len(df)} entries!")
