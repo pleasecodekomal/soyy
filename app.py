@@ -27,7 +27,7 @@ with st.sidebar:
 
     # Configure GenAI if key is available
     if api_key:
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 # --- HELPER: GEMINI GENERATION ---
 def get_gemini_response(prompt):
