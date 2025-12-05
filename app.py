@@ -5,8 +5,6 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-To rewrite the Google Analytics code using `st.markdown` for a Streamlit app, you can use the following:
-
 import streamlit as st
 
 GA_TRACKING_ID = "G-BLKEL70ZJN"
